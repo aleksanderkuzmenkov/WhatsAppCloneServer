@@ -20,6 +20,7 @@ public class Connect extends UnicastRemoteObject implements IConnect{
     private String userId;
 
     public Connect() throws RemoteException{
+        System.out.println("New Thread");
         try {
             con = DriverManager.getConnection(url, login, password);
             stmt = con.createStatement();
@@ -77,9 +78,49 @@ public class Connect extends UnicastRemoteObject implements IConnect{
     }
 
     @Override
-    public String getChats(String phoneNumber) throws RemoteException {
+    public HashMap<String, String> getChats(String userFromId, String userToId) throws Exception {
 
-        return "LOH";
+//        String query = "SELECT MESSAGE FROM CHAT_MESSAGING WHERE USER_FROM_ID = " + userFromId + " AND USER_TO_ID = " + userToId;
+
+
+//        String query = "SELECT USER_FROM_ID, USER_TO_ID, MESSAGE " +
+//                "FROM CHAT_MESSAGING " +
+//                "WHERE (USER_FROM_ID = " + userFromId + " AND USER_TO_ID = "  + userToId + ") " +
+//                "OR USER_FROM_ID = " + userToId + " AND USER_TO_ID = " + userFromId +
+//                " ORDER BY ID";
+
+
+        String query = "SELECT u.NAME, m.MESSAGE " +
+                "FROM CHAT_MESSAGING m " +
+                "INNER JOIN CHAT_USERS u " +
+                "ON m.USER_TO_ID = u.ID " +
+                "WHERE (USER_FROM_ID = " + userFromId + " AND USER_TO_ID = " + userToId + ")" +
+                " OR USER_FROM_ID = " + userToId + " AND USER_TO_ID = " + userFromId +
+                " ORDER BY m.ID";
+
+        HashMap<String, String> chatMap = new HashMap<>();
+
+        resultSet = stmt.executeQuery(query);
+
+
+
+
+        while (resultSet.next()){
+
+            chatMap.put(resultSet.getString(1), resultSet.getString(2));
+
+
+        System.out.println(resultSet.getString(1));
+        System.out.println(resultSet.getString(2));
+
+        }
+
+
+
+        System.out.println("live");
+
+
+        return chatMap;
     }
 
     @Override
@@ -112,10 +153,7 @@ public class Connect extends UnicastRemoteObject implements IConnect{
             phoneNumber = resultSet.getString(1);
         }
 
-        System.out.println(phoneNumber);
-
         return phoneNumber;
     }
-
 
 }
